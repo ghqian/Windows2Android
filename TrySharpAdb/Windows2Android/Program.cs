@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpAdbClient;
+using System;
 using System.Windows.Forms;
 
 namespace Windows2Android
@@ -13,7 +14,11 @@ namespace Windows2Android
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+
+            var server = new AdbServer();
+            var result = server.StartServer(@"C:\Users\dibap\AppData\Local\Android\Sdk\platform-tools\adb.exe", restartServerIfNewer: false);
+
+            Application.Run(new DeviceListForm());
         }
     }
 }
