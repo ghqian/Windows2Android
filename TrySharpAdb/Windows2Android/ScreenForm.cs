@@ -28,11 +28,10 @@ namespace Windows2Android
         private int minitouchPort = 1111;
         private TcpSocket minicapSocket;
         private TcpSocket minitouchSocket;
+        private bool minicapReady = false;
+        private bool minitouchReady = false;
 
-        private float ratioWidth = 1.0f;
-        private float ratioHeight = 1.0f;
-
-        public void SetDevice(DeviceData device)
+        public async Task SetDevice(DeviceData device)
         {
             this.device = device;
             props = DeviceExtensions.GetProperties(device);
@@ -44,6 +43,46 @@ namespace Windows2Android
             UploadFile($".\\resource\\minicap\\{abi}\\bin\\minicap", "/data/local/tmp/minicap");
             UploadFile($".\\resource\\minicap\\{abi}\\lib\\android-{sdk}\\minicap.so", "/data/local/tmp/minicap.so");
             UploadFile($".\\resource\\minirev\\{abi}\\minirev", "/data/local/tmp/minirev");
+
+            var image = await AdbClient.Instance.GetFrameBufferAsync(device, CancellationToken.None);
+            int width = image.Width;
+            int height = image.Height;
+            int virtualWidth = 360;
+            int virtualHeight = height * 360 / width;
+            pictureBox1.Width = virtualWidth;
+            pictureBox1.Height = virtualHeight;
+
+            var minicapReceiver = new StartMinicapReceiver();
+            minicapReceiver.screenFrom = this;
+            string cmd = $"LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P {width}x{height}@{virtualWidth}x{virtualHeight}/0";
+            AdbClient.Instance.ExecuteRemoteCommandAsync(cmd, device, minicapReceiver, CancellationToken.None, int.MaxValue);
+
+            var minitouchReceiver = new StartMinitouchReceiver();
+            minitouchReceiver.screenFrom = this;
+            AdbClient.Instance.ExecuteRemoteCommandAsync("/data/local/tmp/minitouch", device, minitouchReceiver, CancellationToken.None, int.MaxValue);
+            SpinWait.SpinUntil(() => minitouchReady && minicapReady);
+
+            AdbClient.Instance.CreateForward(device, ForwardSpec.Parse($"tcp:{minitouchPort}"),
+                ForwardSpec.Parse("localabstract:minitouch"), true);
+            AdbClient.Instance.CreateForward(device, ForwardSpec.Parse($"tcp:{minicapPort}"),
+                ForwardSpec.Parse("localabstract:minicap"), true);
+            Screencast();
+            minitouchSocket = new TcpSocket();
+            minitouchSocket.Connect(new IPEndPoint(IPAddress.Loopback, minitouchPort));
+            Text = $"{device.Model} {device.Serial}";
+            Show();
+        }
+
+        public ScreenForm()
+        {
+            InitializeComponent();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            minicapSocket.Dispose();
+            minitouchSocket.Dispose();
         }
 
         private void UploadFile(string source, string target)
@@ -53,84 +92,6 @@ namespace Windows2Android
             {
                 service.Push(stream, target, 0xFFFF, DateTime.Now, null, CancellationToken.None);
             }
-        }
-
-        public ScreenForm()
-        {
-            InitializeComponent();
-        }
-
-        public class StartMinicapReceiver : IShellOutputReceiver
-        {
-            public bool ParsesErrors => false;
-
-            public void AddOutput(string line)
-            {
-                Debug.WriteLine(line);
-                if (line.Contains("bytes for JPG encoder"))
-                {
-                }
-            }
-
-            public void Flush()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public class StartMinitouchReceiver : IShellOutputReceiver
-        {
-            public ScreenForm screenFrom;
-            public bool ParsesErrors => false;
-
-            public void AddOutput(string line)
-            {
-                Debug.WriteLine(line);
-                if (line.Contains("touch device"))
-                {
-                    string pattern = "([0-9]+)x([0-9]+)";
-                    Match match = Regex.Match(line, pattern);
-                    if (match.Success)
-                    {
-                        Debug.WriteLine(match.Groups[1] + " " + match.Groups[2]);
-                        screenFrom.touchWidth = int.Parse(match.Groups[1].Value);
-                        screenFrom.touchHeight = int.Parse(match.Groups[2].Value);
-                    }
-                }
-            }
-
-            public void Flush()
-            {
-            }
-        }
-
-        private async void ScreenForm_Load(object sender, EventArgs e)
-        {
-            var image = await AdbClient.Instance.GetFrameBufferAsync(device, CancellationToken.None);
-            int height = image.Height;
-            int width = image.Width;
-
-            var minicapReceiver = new StartMinicapReceiver();
-            string cmd = $"LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P {width}x{height}@{width / 2}x{height / 2}/0";
-            AdbClient.Instance.ExecuteRemoteCommandAsync(cmd, device, minicapReceiver, CancellationToken.None, int.MaxValue);
-
-            var minitouchReceiver = new StartMinitouchReceiver();
-            minitouchReceiver.screenFrom = this;
-            AdbClient.Instance.ExecuteRemoteCommandAsync("/data/local/tmp/minitouch", device, minitouchReceiver, CancellationToken.None, int.MaxValue);
-        }
-
-        class Banner
-        {
-            public int version = 0;
-            public int length = 0;
-            public int pid = 0;
-
-            public int realWidth = 0;
-            public int realHeight = 0;
-            public int virtualWidth = 0;
-            public int virtualHeight = 0;
-            public int orientation = 0;
-            public int quirks = 0;
         }
 
         private async Task Screencast()
@@ -247,8 +208,9 @@ namespace Windows2Android
                                 throw new Exception();
                             }
                             Image image = Image.FromStream(new MemoryStream(frameBody));
-                            this.AutoSize = true;
                             pictureBox1.Image = image;
+                            Width = image.Width + 16;
+                            Height = image.Height + 100;
 
                             cursor += frameBodyLength;
                             frameBodyLength = readFrameBytes = 0;
@@ -267,17 +229,6 @@ namespace Windows2Android
                     }
                 }
             }
-        }
-
-        private async void button1_Click(object sender, EventArgs e)
-        {
-            AdbClient.Instance.CreateForward(device, ForwardSpec.Parse($"tcp:{minitouchPort}"),
-                ForwardSpec.Parse("localabstract:minitouch"), true);
-            AdbClient.Instance.CreateForward(device, ForwardSpec.Parse($"tcp:{minicapPort}"),
-                ForwardSpec.Parse("localabstract:minicap"), true);
-            Screencast();
-            minitouchSocket = new TcpSocket();
-            minitouchSocket.Connect(new IPEndPoint(IPAddress.Loopback, minitouchPort));
         }
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
@@ -315,6 +266,82 @@ namespace Windows2Android
             minitouchSocket.Send(bytes, 0, bytes.Length, SocketFlags.None);
             bytes = AdbClient.Encoding.GetBytes("c\n");
             minitouchSocket.Send(bytes, 0, bytes.Length, SocketFlags.None);
+        }
+
+        public class StartMinicapReceiver : IShellOutputReceiver
+        {
+            public ScreenForm screenFrom;
+            public bool ParsesErrors => false;
+
+            public void AddOutput(string line)
+            {
+                Debug.WriteLine(line);
+                if (line.Contains("bytes for JPG encoder"))
+                {
+                    screenFrom.minicapReady = true;
+                }
+            }
+
+            public void Flush()
+            {
+            }
+        }
+
+        public class StartMinitouchReceiver : IShellOutputReceiver
+        {
+            public ScreenForm screenFrom;
+            public bool ParsesErrors => false;
+
+            public void AddOutput(string line)
+            {
+                Debug.WriteLine(line);
+                if (line.Contains("touch device"))
+                {
+                    screenFrom.minitouchReady = true;
+
+                    string pattern = "([0-9]+)x([0-9]+)";
+                    Match match = Regex.Match(line, pattern);
+                    if (match.Success)
+                    {
+                        Debug.WriteLine(match.Groups[1] + " " + match.Groups[2]);
+                        screenFrom.touchWidth = int.Parse(match.Groups[1].Value);
+                        screenFrom.touchHeight = int.Parse(match.Groups[2].Value);
+                    }
+                }
+            }
+
+            public void Flush()
+            {
+            }
+        }
+
+        public class Banner
+        {
+            public int version = 0;
+            public int length = 0;
+            public int pid = 0;
+
+            public int realWidth = 0;
+            public int realHeight = 0;
+            public int virtualWidth = 0;
+            public int virtualHeight = 0;
+            public int orientation = 0;
+            public int quirks = 0;
+        }
+
+        private void menuButton_Click(object sender, EventArgs e)
+        {
+            AdbClient.Instance.ExecuteRemoteCommand($"input keyevent {AdbKeyCode.MENU}", device, new ConsoleOutputReceiver());
+        }
+
+        private void homeButton_Click(object sender, EventArgs e)
+        {
+            AdbClient.Instance.ExecuteRemoteCommand($"input keyevent {AdbKeyCode.HOME}", device, new ConsoleOutputReceiver());
+        }
+
+        private void backButton_Click(object sender, EventArgs e)
+        {
+            AdbClient.Instance.ExecuteRemoteCommand($"input keyevent {AdbKeyCode.BACK}", device, new ConsoleOutputReceiver());
         }
     }
 }

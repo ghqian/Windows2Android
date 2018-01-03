@@ -32,10 +32,7 @@
             this.modelColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.serialColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.productColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.nameColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.stateColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.featuresColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.usbColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.deviceGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -51,10 +48,7 @@
             this.modelColumn,
             this.serialColumn,
             this.productColumn,
-            this.nameColumn,
-            this.stateColumn,
-            this.featuresColumn,
-            this.usbColumn});
+            this.stateColumn});
             this.deviceGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.deviceGridView.Location = new System.Drawing.Point(0, 0);
             this.deviceGridView.MultiSelect = false;
@@ -70,67 +64,39 @@
             // 
             // modelColumn
             // 
-            this.modelColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.modelColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.modelColumn.DataPropertyName = "Model";
             this.modelColumn.HeaderText = "Model";
             this.modelColumn.Name = "modelColumn";
             this.modelColumn.ReadOnly = true;
             this.modelColumn.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.modelColumn.Width = 114;
             // 
             // serialColumn
             // 
-            this.serialColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.serialColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.serialColumn.DataPropertyName = "Serial";
             this.serialColumn.HeaderText = "Serial";
             this.serialColumn.Name = "serialColumn";
             this.serialColumn.ReadOnly = true;
             this.serialColumn.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.serialColumn.Width = 110;
             // 
             // productColumn
             // 
-            this.productColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.productColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.productColumn.DataPropertyName = "Product";
             this.productColumn.HeaderText = "Product";
             this.productColumn.Name = "productColumn";
             this.productColumn.ReadOnly = true;
             this.productColumn.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.productColumn.Width = 134;
-            // 
-            // nameColumn
-            // 
-            this.nameColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.nameColumn.DataPropertyName = "Name";
-            this.nameColumn.HeaderText = "Name";
-            this.nameColumn.Name = "nameColumn";
-            this.nameColumn.ReadOnly = true;
-            this.nameColumn.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.nameColumn.Width = 111;
             // 
             // stateColumn
             // 
-            this.stateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.stateColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.stateColumn.DataPropertyName = "State";
             this.stateColumn.HeaderText = "State";
             this.stateColumn.Name = "stateColumn";
             this.stateColumn.ReadOnly = true;
             this.stateColumn.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.stateColumn.Width = 108;
-            // 
-            // featuresColumn
-            // 
-            this.featuresColumn.DataPropertyName = "Features";
-            this.featuresColumn.HeaderText = "Features";
-            this.featuresColumn.Name = "featuresColumn";
-            this.featuresColumn.ReadOnly = true;
-            // 
-            // usbColumn
-            // 
-            this.usbColumn.DataPropertyName = "Usb";
-            this.usbColumn.HeaderText = "Usb";
-            this.usbColumn.Name = "usbColumn";
-            this.usbColumn.ReadOnly = true;
             // 
             // DeviceListForm
             // 
@@ -139,7 +105,7 @@
             this.ClientSize = new System.Drawing.Size(1532, 1103);
             this.Controls.Add(this.deviceGridView);
             this.Name = "DeviceListForm";
-            this.Text = "DeviceListForm";
+            this.Text = "Device List";
             ((System.ComponentModel.ISupportInitialize)(this.deviceGridView)).EndInit();
             this.ResumeLayout(false);
 
@@ -151,10 +117,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn modelColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn serialColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn productColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn nameColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn stateColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn featuresColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn usbColumn;
     }
 }
 

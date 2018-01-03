@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdbKey.cs" />
     <Compile Include="DeviceListForm.cs">
       <SubType>Form</SubType>
     </Compile>
