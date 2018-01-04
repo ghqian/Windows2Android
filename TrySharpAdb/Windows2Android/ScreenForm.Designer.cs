@@ -31,9 +31,9 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.menuButton = new System.Windows.Forms.Button();
             this.homeButton = new System.Windows.Forms.Button();
             this.backButton = new System.Windows.Forms.Button();
-            this.menuButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -76,6 +76,17 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(802, 100);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
+            // menuButton
+            // 
+            this.menuButton.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.menuButton.Location = new System.Drawing.Point(3, 3);
+            this.menuButton.Name = "menuButton";
+            this.menuButton.Size = new System.Drawing.Size(261, 94);
+            this.menuButton.TabIndex = 2;
+            this.menuButton.Text = "Menu";
+            this.menuButton.UseVisualStyleBackColor = true;
+            this.menuButton.Click += new System.EventHandler(this.menuButton_Click);
+            // 
             // homeButton
             // 
             this.homeButton.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -98,17 +109,6 @@
             this.backButton.UseVisualStyleBackColor = true;
             this.backButton.Click += new System.EventHandler(this.backButton_Click);
             // 
-            // menuButton
-            // 
-            this.menuButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.menuButton.Location = new System.Drawing.Point(3, 3);
-            this.menuButton.Name = "menuButton";
-            this.menuButton.Size = new System.Drawing.Size(261, 94);
-            this.menuButton.TabIndex = 2;
-            this.menuButton.Text = "Menu";
-            this.menuButton.UseVisualStyleBackColor = true;
-            this.menuButton.Click += new System.EventHandler(this.menuButton_Click);
-            // 
             // ScreenForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 24F);
@@ -117,6 +117,8 @@
             this.ClientSize = new System.Drawing.Size(802, 307);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.pictureBox1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.Name = "ScreenForm";
             this.Text = "ScreenForm";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

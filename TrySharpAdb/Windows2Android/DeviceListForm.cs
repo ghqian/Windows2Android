@@ -1,6 +1,5 @@
 ﻿using SharpAdbClient;
 using System;
-using System.Diagnostics;
 using System.Net;
 using System.Windows.Forms;
 
@@ -15,7 +14,6 @@ namespace Windows2Android
         {
             InitializeComponent();
 
-            Log.LogOutput = new DebugLogOutput();
             Log.Level = LogLevel.Verbose;
 
             monitor = new DeviceMonitor(new AdbSocket(new IPEndPoint(IPAddress.Loopback, AdbClient.AdbServerPort)));
@@ -29,34 +27,30 @@ namespace Windows2Android
         {
             MethodInvoker callback = () =>
             {
-                deviceGridView.DataSource = AdbClient.Instance.GetDevices();
-                deviceGridView.Invalidate();
+                deviceListBox.DataSource = AdbClient.Instance.GetDevices();
+                deviceListBox.DisplayMember = "Model";
+                deviceListBox.Invalidate();
             };
-            if (deviceGridView.InvokeRequired)
-                deviceGridView.Invoke(callback);
+            if (deviceListBox.InvokeRequired)
+                deviceListBox.Invoke(callback);
             else
                 callback();
         }
-
-        private async void deviceGridView_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        
+        private void deviceListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (e.RowIndex < 0 || e.RowIndex >= deviceGridView.RowCount)
-                return;
-            screenForm = new ScreenForm();
-            await screenForm.SetDevice(deviceGridView.Rows[e.RowIndex].DataBoundItem as DeviceData);
+            var device = deviceListBox.SelectedItem as DeviceData;
+            modelTextBox.Text = device.Model;
+            serialTextBox.Text = device.Serial;
+            productTextBox.Text = device.Product;
+            statusTextBox.Text = device.State.ToString();
         }
 
-        class DebugLogOutput : ILogOutput
+        private async  void connectButton_Click(object sender, EventArgs e)
         {
-            public void Write(LogLevel.LogLevelInfo logLevel, string tag, string message)
-            {
-                Debug.WriteLine(message, tag);
-            }
-
-            public void WriteAndPromptLog(LogLevel.LogLevelInfo logLevel, string tag, string message)
-            {
-                Debug.WriteLine(message, tag);
-            }
+            var device = deviceListBox.SelectedItem as DeviceData;
+            screenForm = new ScreenForm();
+            await screenForm.SetDevice(device);
         }
     }
 }
